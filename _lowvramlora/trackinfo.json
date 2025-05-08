@@ -1,0 +1,22 @@
+{
+    "data/sample.flac": {
+        "album": "Album",
+        "trackName": "Title",
+        "description": "Description",
+        "tags": [
+            "vgm",
+            "16-bit",
+            "menu",
+            "instrumental",
+            "heroic",
+            "synth",
+            "loop"
+        ],
+        "instruments": [
+            "overdriven guitar lead",
+            "strings harmony",
+            "drums",
+            "bass"
+        ]
+    }
+}
