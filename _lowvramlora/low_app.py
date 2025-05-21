@@ -7,7 +7,7 @@ parser.add_argument("--device_id", type=int, default=0)
 parser.add_argument("--share", type=bool, default=False)
 parser.add_argument("--bf16", type=bool, default=True)
 parser.add_argument("--torch_compile", type=bool, default=False)
-parser.add_argument("--lora_config_path", type=str, default="data/mmx/lora_config.json", help="Path to LoRA config JSON file, if LoRA was used for training.")
+parser.add_argument("--lora_config_path", type=str, default="data/lora_config.json", help="Path to LoRA config JSON file, if LoRA was used for training.")
 parser.add_argument("--ckpt", type=str, default=None, help="Path to the PyTorch Lightning checkpoint file (e.g., last.ckpt) with trained weights.")
 
 args = parser.parse_args()

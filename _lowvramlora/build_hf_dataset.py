@@ -66,7 +66,7 @@ def build_recaptions(tags_list):
 def main():
     global TRACK_INFO # Declare TRACK_INFO as global to modify it
 
-    root = Path(".").resolve()  # Assumes script is run from a dir containing MMX, MMX2 etc.
+    root = Path(".").resolve()  # Assumes script is run from a dir containing Album, Album2 etc.
     # Load TRACK_INFO from JSON file
     track_info_path = root / "trackinfo.json"
     

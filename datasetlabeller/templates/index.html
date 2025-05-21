@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Label Editor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body> <div class="app-container">
+        <header>
+            <h1>Track Label Editor</h1>
+            <div class="theme-switch-wrapper">
+                <span class="theme-switch-label">Dark Mode:</span>
+                <label class="theme-switch" for="themeToggleCheckbox">
+                    <input type="checkbox" id="themeToggleCheckbox">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </header>
+
+        <main class="content-wrapper">
+            <aside class="track-list-panel">
+                <h2>Track Library</h2>
+                <input type="text" id="trackSearchInput" placeholder="Search tracks..." class="search-input">
+                <ul id="trackList">
+                    {% for key in sorted_track_keys %}
+                        <li data-track-key="{{ key }}"><a href="#">{{ key }}</a></li>
+                    {% else %}
+                        <li>No tracks found in trackinfo.json.</li>
+                    {% endfor %}
+                </ul>
+            </aside>
+
+            <section class="editor-panel" id="editorPanel" style="display: none;">
+                <h2 id="editingTrackKey">Editing: <span></span></h2>
+                <form id="trackForm">
+                    <input type="hidden" id="currentTrackKey" name="key">
+
+                    <div class="form-group audio-group">
+                        <label for="audioPlayer">Now Playing:</label>
+                        <audio id="audioPlayer" controls src=""></audio>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="game">Game:</label>
+                        <input type="text" id="game" name="game" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="boss">Boss (leave empty if none):</label>
+                        <input type="text" id="boss" name="boss" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="stage">Stage/Context:</label>
+                        <input type="text" id="stage" name="stage" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description:</label>
+                        <textarea id="description" name="description" rows="4" class="form-control"></textarea>
+                    </div>
+
+                    <!-- NEW LYRICS FIELD -->
+                    <div class="form-group">
+                        <label for="lyrics">Lyrics:</label>
+                        <textarea id="lyrics" name="lyrics" rows="6" class="form-control" placeholder="Enter full song lyrics here…"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bpm">BPM (leave blank if unknown):</label>
+                        <input type="number" id="bpm" name="bpm" min="1" class="form-control">
+                      </div>
+                         <div class="bpm-field">
+                               <input type="number" id="bpm" name="bpm" min="1" class="form-control">
+                               <button type="button" id="detectBpmButton" class="btn">Detect BPM</button>
+                           </div>
+                      
+                      <div class="form-group">
+                        <label for="musicKey">Key (e.g. A minor, C#):</label>
+                        <input type="text" id="musicKey" name="musicKey" class="form-control">
+                      </div>
+                      
+
+                    <div class="chips-section form-group">
+                        <label for="tagInput">Tags:</label>
+                        <div id="tagsContainer" class="chips-container">
+                            </div>
+                        <input type="text" id="tagInput" placeholder="Add a tag and press Enter..." class="form-control" list="allTagsDatalist">
+                        <datalist id="allTagsDatalist">
+                            {% for tag in all_tags_master %}
+                                <option value="{{ tag }}">
+                            {% endfor %}
+                        </datalist>
+                    </div>
+
+                    <div class="chips-section form-group">
+                        <label for="instrumentInput">Instruments:</label>
+                        <div id="instrumentsContainer" class="chips-container">
+                            </div>
+                        <input type="text" id="instrumentInput" placeholder="Add an instrument and press Enter..." class="form-control" list="allInstrumentsDatalist">
+                         <datalist id="allInstrumentsDatalist">
+                            {% for instrument in all_instruments_master %}
+                                <option value="{{ instrument }}">
+                            {% endfor %}
+                        </datalist>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" id="saveButton" class="btn btn-primary">Save Changes</button>
+                        <p id="saveStatus" class="status-message"></p>
+                    </div>
+                </form>
+            </section>
+        </main>
+        <footer>
+            <p>Track Editor - &copy; <span id="currentYear"></span></p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

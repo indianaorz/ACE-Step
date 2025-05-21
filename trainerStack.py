@@ -46,7 +46,11 @@ class Pipeline(LightningModule):
         max_steps: int = 200000,
         warmup_steps: int = 4000,
         dataset_path: str = "./cache", # MODIFIED: Default path to cached dataset
-        lora_config_path: str = None
+        lora_config_path: str = None,
+
+        new_lora_config_path: str | None = None,
+        new_lora_name: str = "lora2",
+        freeze_prev_loras: bool = False,
     ):
         super().__init__()
         self.save_hyperparameters() # Saves all __init__ args
@@ -108,6 +112,36 @@ class Pipeline(LightningModule):
             if not lora_params_check:
                 logger.warning("No parameters with 'lora_' in their name found or they don't require grad. Check LoRA config and application.")
 
+        # ─── OPTIONAL SECOND‑STAGE LORA TRAINING ──────────────────────────────────
+        # ─── OPTIONAL SECOND‑STAGE LoRA TRAINING ──────────────────────────────────────
+        if self.hparams.new_lora_config_path is not None:
+            # 2‑a)  Optionally freeze *all* parameters that belong to the
+            #       LoRA(s) stored in the checkpoint we just loaded.
+            if self.hparams.freeze_prev_loras:
+                for n, p in self.transformers.named_parameters():
+                    if "lora_" in n:
+                        p.requires_grad = False
+                logger.info("✅  All existing LoRA params frozen.")
+
+            # 2‑b)  Create and register the *new* adapter
+            from peft import LoraConfig
+            with open(self.hparams.new_lora_config_path, "r", encoding="utf-8") as f:
+                new_cfg = LoraConfig(**json.load(f))
+
+            new_adapter_name = self.hparams.new_lora_name
+            self.transformers.add_adapter(adapter_config=new_cfg,
+                                        adapter_name=new_adapter_name)
+
+            # 2‑c)  Activate **only** the new adapter for forward & training
+            #       (older adapters stay frozen *and* inactive ⇒ no grads / no compute)
+            self.transformers.set_adapter(new_adapter_name)
+            logger.info(f"🆕  Added trainable adapter “{new_adapter_name}”; it is now the active adapter.")
+
+# ──────────────────────────────────────────────────────────────────────────────
+
+
+
+
         # DCAE needed for plot_step (decoding latents to audio)
         self.dcae = acestep_pipeline.music_dcae.float() # Keep on CPU initially
         self.dcae.requires_grad_(False)
@@ -128,6 +162,24 @@ class Pipeline(LightningModule):
         # These projection losses are assumed to be calculated by self.transformers
         # based on the cached SSL features it receives.
 
+    def load_state_dict(self, state_dict, strict: bool = True):
+            """
+            We resume from a checkpoint that has no weights for the brand‑new
+            LoRA adapter (“lofi”), so we deliberately ignore the missing keys.
+            """
+            # always load with strict=False
+            missing, unexpected = super().load_state_dict(state_dict, strict=False)
+
+            # optional: remember what was skipped so you can print / debug later
+            if missing:
+                logger.warning(
+                    f"[LoRA‑resume]  skipped {len(missing)} missing keys "
+                    f"(new adapter or other freshly‑added params).")
+            if unexpected:
+                logger.warning(
+                    f"[LoRA‑resume]  ignored {len(unexpected)} unexpected keys.")
+
+            return missing, unexpected
 
     # REMOVED: infer_mert_ssl, infer_mhubert_ssl, get_text_embeddings
     # These are now part of the offline preprocessing.
@@ -825,7 +877,11 @@ def merge_lora_checkpoint(lora_ckpt_path: str, output_dir: str) -> str | None:
             max_steps=hparams.get('max_steps', 200000),
             warmup_steps=hparams.get('warmup_steps', 4000),
             dataset_path=hparams.get('dataset_path', './cache'),
-            lora_config_path=hparams.get('lora_config_path', None)
+            lora_config_path=hparams.get('lora_config_path', None),
+
+            new_lora_config_path    = args.new_lora_config_path,
+            new_lora_name           = args.new_lora_name,
+            freeze_prev_loras       = args.freeze_prev_loras,
         )
         logger.info("Created new Pipeline instance with checkpoint hyperparameters.")
     except Exception as e:
@@ -916,7 +972,11 @@ def main(args):
         logit_std=args.logit_std,
         timestep_densities_type=args.timestep_densities_type,
         warmup_steps=args.warmup_steps,
-        lora_config_path=args.lora_config_path
+        lora_config_path=args.lora_config_path,
+
+        new_lora_config_path    = args.new_lora_config_path,
+        new_lora_name           = args.new_lora_name,
+        freeze_prev_loras       = args.freeze_prev_loras,
     )
     
     # The batch size for the DataLoader will be implicitly set by the Trainer
@@ -988,7 +1048,7 @@ if __name__ == "__main__":
     parser.add_argument("--num_workers", type=int, default=4) # Reduced default as per typical local setup
     parser.add_argument("--epochs", type=int, default=-1, help="Number of epochs, -1 for max_steps controlled.")
     parser.add_argument("--max_steps", type=int, default=10000000) # Reduced for quicker local test
-    parser.add_argument("--every_n_train_steps", type=int, default=2500) # Checkpoint saving frequency
+    parser.add_argument("--every_n_train_steps", type=int, default=500) # Checkpoint saving frequency
     parser.add_argument("--dataset_path", type=str, default="./cache", help="Path to the PREPROCESSED dataset.") # MODIFIED DEFAULT
     parser.add_argument("--exp_name", type=str, default="text2music_cached_test")
     parser.add_argument("--precision", type=str, default="bf16-mixed", help="Training precision, e.g., '32-true', '16-mixed', 'bf16-mixed'")
@@ -1018,6 +1078,14 @@ if __name__ == "__main__":
     parser.add_argument("--strategy", type=str, default="auto", help="Training strategy (e.g., 'ddp', 'deepspeed_stage_2'). 'auto' is good default.")
     parser.add_argument("--log_every_n_steps", type=int, default=50, help="Logging frequency.")
     parser.add_argument("--merge_lora", action="store_true", help="Merge LoRA weights from checkpoint before training.")
+
+    # trainer.py  (parser section – add directly after --lora_config_path)
+    parser.add_argument("--new_lora_config_path", type=str, default=None,
+                        help="JSON file that describes the *second* LoRA you want to train")
+    parser.add_argument("--new_lora_name",      type=str, default="lora2",
+                        help="Name to register the new adapter inside PEFT")
+    parser.add_argument("--freeze_prev_loras",  action="store_true",
+                        help="Freeze all existing LoRA adapters that come with --ckpt_path")
 
 
     args = parser.parse_args()

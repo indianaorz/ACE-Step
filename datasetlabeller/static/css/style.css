@@ -1,0 +1,404 @@
+:root {
+    /* Light Theme (Default) */
+    --bg-primary: #f8f9fa;
+    --bg-secondary: #ffffff;
+    --text-primary: #212529;
+    --text-secondary: #495057;
+    --text-tertiary: #6c757d;
+    --border-color: #dee2e6;
+    --accent-primary: #007bff;
+    --accent-primary-hover: #0056b3;
+    --accent-secondary: #6c757d;
+    --chip-bg: var(--accent-primary);
+    --chip-text: #ffffff;
+    --input-bg: #ffffff;
+    --input-border: #ced4da;
+    --link-color: var(--accent-primary);
+    --link-hover-bg: #e9ecef;
+    --shadow-color: rgba(0,0,0,0.05);
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --header-bg: var(--accent-primary);
+    --header-text: #ffffff;
+}
+
+body.dark-mode {
+    /* Dark Theme */
+    --bg-primary: #1a1a1a; /* Darker background */
+    --bg-secondary: #2c2c2c; /* Slightly lighter than primary for cards/panels */
+    --text-primary: #e0e0e0; /* Light text for readability */
+    --text-secondary: #b0b0b0;
+    --text-tertiary: #888888;
+    --border-color: #444444; /* Darker border */
+    --accent-primary: #0d6efd; /* Slightly brighter blue for dark mode */
+    --accent-primary-hover: #0a58ca;
+    --accent-secondary: #8c959d;
+    --chip-bg: var(--accent-primary);
+    --chip-text: #ffffff;
+    --input-bg: #333333;
+    --input-border: #555555;
+    --link-color: var(--accent-primary);
+    --link-hover-bg: #3a3a3a;
+    --shadow-color: rgba(0,0,0,0.2); /* Darker shadow */
+    --success-color: #198754;
+    --danger-color: #dc3545; /* Keep similar, or adjust if needed */
+    --header-bg: #0d6efd;
+    --header-text: #ffffff;
+}
+
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    margin: 0;
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-size: 16px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.app-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+header {
+    background-color: var(--header-bg);
+    color: var(--header-text);
+    padding: 15px 0; /* Reduced padding a bit */
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
+    display: flex; /* For aligning title and toggle */
+    justify-content: space-between; /* For aligning title and toggle */
+    align-items: center; /* For aligning title and toggle */
+    padding-left: 20px; /* Padding for content */
+    padding-right: 20px; /* Padding for content */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.6em; /* Adjusted size */
+}
+
+/* Dark Mode Toggle Switch Styles */
+.theme-switch-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+.theme-switch-label {
+    margin-right: 10px;
+    font-size: 0.9em;
+}
+
+.theme-switch {
+    display: inline-block;
+    height: 24px; /* Slightly smaller */
+    position: relative;
+    width: 44px; /* Slightly smaller */
+}
+
+.theme-switch input {
+    display: none;
+}
+
+.slider {
+    background-color: #ccc;
+    bottom: 0;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    transition: .4s;
+    border-radius: 24px; /* Match height */
+}
+
+.slider:before {
+    background-color: #fff;
+    bottom: 3px; /* Adjust for smaller size */
+    content: "";
+    height: 18px; /* Adjust for smaller size */
+    left: 3px; /* Adjust for smaller size */
+    position: absolute;
+    transition: .4s;
+    width: 18px; /* Adjust for smaller size */
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: var(--accent-primary); /* Use theme color */
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px); /* Adjust for smaller size */
+}
+/* End Dark Mode Toggle Switch Styles */
+
+
+.content-wrapper {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.track-list-panel {
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+    background: var(--bg-secondary);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px var(--shadow-color);
+    height: calc(100vh - 140px); /* Adjusted for potentially smaller header */
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border-color);
+}
+
+.track-list-panel h2 {
+    margin-top: 0;
+    font-size: 1.4em;
+    color: var(--accent-primary);
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.search-input {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid var(--input-border);
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+.search-input::placeholder {
+    color: var(--text-tertiary);
+}
+
+
+#trackList {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+#trackList li {
+    margin-bottom: 5px;
+}
+
+#trackList li a {
+    text-decoration: none;
+    color: var(--link-color);
+    display: block;
+    padding: 10px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    font-size: 0.95em;
+    word-break: break-all;
+}
+
+#trackList li a:hover, #trackList li.active a {
+    background-color: var(--link-hover-bg);
+    color: var(--accent-primary);
+    font-weight: 500;
+}
+
+.editor-panel {
+    flex: 3;
+    background: var(--bg-secondary);
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px var(--shadow-color);
+    border: 1px solid var(--border-color);
+}
+
+.editor-panel h2 {
+    margin-top: 0;
+    font-size: 1.6em;
+    color: var(--accent-primary);
+    margin-bottom: 20px;
+}
+#editingTrackKey span {
+    font-weight: normal;
+    color: var(--text-secondary);
+    font-size: 0.9em;
+}
+
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-control {
+    width: calc(100% - 24px);
+    padding: 12px;
+    border: 1px solid var(--input-border);
+    background-color: var(--input-bg);
+    color: var(--text-primary);
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+.form-control::placeholder {
+    color: var(--text-tertiary);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 80px;
+}
+
+#audioPlayer {
+    width: 100%;
+    margin-top: 5px;
+}
+/* Style audio player for dark mode if possible (browser dependent) */
+body.dark-mode #audioPlayer {
+    filter: invert(1) hue-rotate(180deg); /* Basic attempt, might need refinement */
+}
+.bpm-field {
+    display: flex;
+  }
+  .bpm-field .form-control {
+    flex: 1;
+    margin-right: 0.5rem;
+  }
+  
+
+.chips-section {
+    margin-bottom: 15px;
+}
+
+.chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    min-height: 40px;
+    margin-bottom: 10px;
+    background-color: var(--input-bg); /* Match input background */
+}
+
+.chip {
+    background-color: var(--chip-bg);
+    color: var(--chip-text);
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 0.9em;
+    display: inline-flex;
+    align-items: center;
+    cursor: default;
+}
+
+.chip .remove-chip {
+    margin-left: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1.1em;
+    padding: 0 4px;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+}
+.chip .remove-chip:hover {
+    background-color: rgba(255,255,255,0.2); /* Assuming chip-text is light */
+}
+
+.chip.dragging {
+    opacity: 0.6;
+    border: 1px dashed var(--accent-primary); /* Example style */
+    background-color: var(--link-hover-bg) !important; /* Ensure it stands out */
+}
+
+/* Optional: Style for when dragging over the container */
+.chips-container.drag-over {
+    /* background-color: var(--link-hover-bg); */ /* Example */
+    /* border-style: dashed; */
+}
+
+body.dark-mode .chip .remove-chip:hover {
+    background-color: rgba(0,0,0,0.2); /* If chip-text is dark on some chips */
+}
+
+
+.form-actions {
+    margin-top: 25px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+}
+
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.btn-primary {
+    background-color: var(--accent-primary);
+    color: var(--chip-text); /* Usually white/light text */
+}
+
+.btn-primary:hover {
+    background-color: var(--accent-primary-hover);
+}
+
+.status-message {
+    margin-top: 10px;
+    font-style: italic;
+    min-height: 1.5em;
+}
+.status-message.success {
+    color: var(--success-color);
+}
+.status-message.error {
+    color: var(--danger-color);
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 30px;
+    color: var(--text-tertiary);
+    font-size: 0.9em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .content-wrapper {
+        flex-direction: column;
+    }
+    .track-list-panel, .editor-panel {
+        width: 100%; /* Fallback for browsers not supporting calc well with flex */
+        max-width: none;
+        height: auto;
+        margin-bottom: 20px;
+    }
+    .track-list-panel {
+        max-height: 40vh;
+    }
+}
